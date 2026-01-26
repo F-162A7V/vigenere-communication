@@ -12,10 +12,11 @@ current_key = ''
 
 def create_code():
     global current_key
-    hourly_code = datetime.now(timezone.utc).isoformat()
-    hourly_code = hourly_code[:-19]
-    hourly_code = sha256(hourly_code.encode('utf-8')).hexdigest()
-    hourly_code = sha256(hourly_code.encode('utf-8')).hexdigest()
+    time = datetime.now(timezone.utc).isoformat()
+    time = time[:-19]
+    hourly_code = sha256(time.encode('utf-8')).hexdigest()
+    time = encode(time, hourly_code)
+    hourly_code = sha256(time.encode('utf-8')).hexdigest()
     hourly_code = encode(hourly_code,hourly_code[:4])
     return hourly_code
 
