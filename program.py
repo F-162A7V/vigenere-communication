@@ -20,7 +20,7 @@ def create_code():
     hourly_code = encode(hourly_code,hourly_code[:4])
     return hourly_code
 
-def craft_resp():
+def craft_msg():
     pass
 
 def parse_resp():
@@ -32,18 +32,15 @@ def handle_conn(sock):
     sock.send()
 
 
-def main(serip,serport):
-    serversock = socket.socket()
-    serversock.bind((serip,serport))
-    serversock.listen(1000000000)
-    threads = []
-    while not stopcond:
-        connection, address = serversock.accept()
-        t1 = threading.Thread(target=handle_conn, args=(connection,))
-        threads.append(t1)
-        t1.start()
-    for t in threads:
-        t.join()
+def main(type, ip, port):
+    you = socket.socket()
+    if (type):
+        you.bind((ip, port))
+        you.listen(1)
+        client = you.accept()
+        handle_conn(client)
+    else:
+        you.connect((ip, port))
 
 
 
@@ -54,7 +51,14 @@ def main(serip,serport):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        main("127.0.0.1",16000)
+    if len(sys.argv) < 4:
+        print("insufficient arguments, please enter desired arguments:")
+        type = int(input('\nArgument 1: Socket type - 1 for server, 0 for client'))
+        ipad = int(input('\nArgument 2: IP address: '))
+        port = int(input('\nArgument 3: Port: '))
+        main(type,ipad,port)
     else:
-        main(sys.argv[1],sys.argv[2])
+        if (sys.argv[1] != "1" or sys.argv[1] != '0'):
+            print("Error: Socket type must be either 1 (Server) or 0 (Client)")
+        else:
+            main(sys.argv[1],sys.argv[2],sys.argv[3])
