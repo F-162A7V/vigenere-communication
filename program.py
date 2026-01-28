@@ -54,7 +54,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 4:
         print("insufficient arguments, please enter desired arguments:")
         type = int(input('\nArgument 1: Socket type - 1 for server, 0 for client'))
-        ipad = int(input('\nArgument 2: IP address: '))
+        ipad = input('\nArgument 2: IP address: ')
         port = int(input('\nArgument 3: Port: '))
         main(type,ipad,port)
     else:
