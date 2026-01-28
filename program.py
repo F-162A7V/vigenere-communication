@@ -1,16 +1,16 @@
-__author__ = "yoav"
+__author__ = "f-162a7v"
 
 import socket, sys, traceback, threading
 from hashlib import sha256
 from vigenere import encode, decode, find_stdispNmod
 from datetime import datetime, timezone
 
-
 stopcond = False
 prev_key = ''
 current_key = ''
+hosting = False
 
-def create_code():
+def create_first_key():
     global current_key
     time = datetime.now(timezone.utc).isoformat()
     time = time[:-19]
@@ -20,27 +20,48 @@ def create_code():
     hourly_code = encode(hourly_code,hourly_code[:4])
     return hourly_code
 
-def craft_msg():
-    pass
+def send_function(sock,firstkey):
+    global hosting
+    key = firstkey
 
-def parse_resp():
-    pass
-
+def recv_function(sock,firstkey):
+    global hosting
+    key = firstkey
 
 def handle_conn(sock):
-    sock = sock[0]
-    sock.send()
+    threads = []
+    initial_key = create_first_key()
+    t1 = threading.Thread(target=send_function,args=(sock,initial_key))
+    t2 = threading.Thread(target=recv_function,args=(sock,initial_key))
+    threads.append(t1)
+    threads.append(t2)
+    t1.start()
+    t2.start()
+
+    for t in threads:
+        t.join()
 
 
-def main(type, ip, port):
+def main(ip, port):
     you = socket.socket()
-    if (type):
-        you.bind((ip, port))
-        you.listen(1)
-        client = you.accept()
-        handle_conn(client)
-    else:
+    global hosting
+    try:
+        print(f"Attempting to connect to {ip} on port {port}....")
+        you.settimeout(1)
         you.connect((ip, port))
+        print(f"Connection established with {ip}")
+        handle_conn(you)
+    except socket.timeout:
+        myname = socket.gethostname()
+        myip = socket.gethostbyname(myname)
+        print(f"Connection attempt failed, hosting and listening on {myip}, {port}....")
+        you = socket.socket()
+        you.bind((myip,port))
+        you.listen(1)
+        cli = you.accept()
+        print(f"Connection established with {ip}")
+        hosting = True
+        handle_conn(cli)
 
 
 
@@ -51,14 +72,10 @@ def main(type, ip, port):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print("insufficient arguments, please enter desired arguments:")
-        type = int(input('\nArgument 1: Socket type - 1 for server, 0 for client'))
-        ipad = input('\nArgument 2: IP address: ')
-        port = int(input('\nArgument 3: Port: '))
-        main(type,ipad,port)
+        ipad = input('\nArgument 1: IP address: ')
+        port = int(input('\nArgument 2: Port: '))
+        main(ipad,port)
     else:
-        if (sys.argv[1] != "1" or sys.argv[1] != '0'):
-            print("Error: Socket type must be either 1 (Server) or 0 (Client)")
-        else:
-            main(sys.argv[1],sys.argv[2],sys.argv[3])
+        main(sys.argv[1],sys.argv[2])
