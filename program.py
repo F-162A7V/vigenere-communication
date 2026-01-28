@@ -10,6 +10,7 @@ prev_key = ''
 current_key = ''
 hosting = False
 
+
 def create_first_key():
     global current_key
     time = datetime.now(timezone.utc).isoformat()
@@ -20,6 +21,7 @@ def create_first_key():
     hourly_code = encode(hourly_code,hourly_code[:4])
     return hourly_code
 
+
 def send_function(sock,firstkey):
     global hosting
     key = firstkey
@@ -27,6 +29,7 @@ def send_function(sock,firstkey):
 def recv_function(sock,firstkey):
     global hosting
     key = firstkey
+
 
 def handle_conn(sock):
     threads = []
@@ -62,11 +65,6 @@ def main(ip, port):
         print(f"Connection established with {ip}")
         hosting = True
         handle_conn(cli)
-
-
-
-
-
 
 
 
