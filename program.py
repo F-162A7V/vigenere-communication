@@ -1,6 +1,6 @@
 __author__ = "f-162a7v"
 
-import socket, sys, traceback, threading
+import socket, sys, traceback, threading, inputimeout, struct
 from hashlib import sha256
 from vigenere import encode, decode, find_stdispNmod
 from datetime import datetime, timezone
@@ -8,8 +8,7 @@ from datetime import datetime, timezone
 stopcond = False
 prev_key = ''
 current_key = ''
-hosting = False
-
+glock = threading.Lock()
 
 def create_first_key():
     global current_key
@@ -21,17 +20,30 @@ def create_first_key():
     hourly_code = encode(hourly_code,hourly_code[:4])
     return hourly_code
 
+def craft_msg(inpt):
+    length = len(inpt)
+    length = struct.pack('i',inpt)
+    key = sha256(inpt.encode()).hexdigest()
+    return
+
 
 def send_function(sock,firstkey):
     global hosting
-    key = firstkey
+    while not stopcond:
+        try:
+            glock.acquire()
+            typee = inputimeout.inputimeout("Press '1' to enter a message.. --> 2",)
+            if typee == "1":
+                content = input("Enter message contents...")
+
+
+        except inputimeout.TimeoutOccurred:
+            pass
 
 def recv_function(sock,firstkey):
-    global hosting
     key = firstkey
 
-
-def handle_conn(sock):
+def handle_conn(sock,mytype):
     threads = []
     initial_key = create_first_key()
     t1 = threading.Thread(target=send_function,args=(sock,initial_key))
@@ -53,7 +65,7 @@ def main(ip, port):
         you.settimeout(1)
         you.connect((ip, port))
         print(f"Connection established with {ip}")
-        handle_conn(you)
+        handle_conn(you,0)
     except socket.timeout:
         myname = socket.gethostname()
         myip = socket.gethostbyname(myname)
@@ -64,7 +76,7 @@ def main(ip, port):
         cli = you.accept()
         print(f"Connection established with {ip}")
         hosting = True
-        handle_conn(cli)
+        handle_conn(cli,1)
 
 
 
