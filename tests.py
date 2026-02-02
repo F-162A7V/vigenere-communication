@@ -1,3 +1,3 @@
 from program import craft_msg
 
-print(craft_msg("hellohellohellohello","bbbbbbbb"))
+print(craft_msg("hellohellohellohello"))
