@@ -27,24 +27,23 @@ def find_stdispNmod(word,i):
         mod = 6
     return stddisp, mod
 
-def encode(word, key):
+def vigencrypt(word, key):
     new_word = ""
     key = key.lower()
     offset = 0
     for i in range(len(word)):
         if word[i] != ' ' or word[i] != '|':
-
             stddisp, mod = find_stdispNmod(word,i)
             row = ord(word[i]) - stddisp
             col = ord(key[(i+offset) % len(key)]) - find_stdispNmod(key,i)[0]
             new_word += chr(stddisp + (row + col) % mod)
         else:
-            offset -= 1;
+            offset -= 1
             new_word += ' '
     return new_word
 
 
-def decode(word, key):
+def vigdecrypt(word, key):
     decoded_word = ""
     key = key.lower()
     offset = 0
@@ -70,9 +69,9 @@ def main():
             text = input("Enter text: ")
             keyword = input("Enter keyword: ")
             if inpt == "1":
-                print("Encoded text: " + encode(text, keyword))
+                print("Encoded text: " + vigencrypt(text, keyword))
             elif inpt == "2":
-                print("Decoded text: " + decode(text, keyword))
+                print("Decoded text: " + vigdecrypt(text, keyword))
             else:
                 print("Invalid input")
         else:

@@ -2,7 +2,7 @@ __author__ = "f-162a7v"
 
 import socket, sys, traceback, threading, inputimeout, struct
 from hashlib import sha256
-from vigenere import encode, decode, find_stdispNmod
+from vigenere import vigencrypt, vigdecrypt
 from datetime import datetime, timezone
 
 stopcond = False
@@ -15,16 +15,19 @@ def create_first_key():
     time = datetime.now(timezone.utc).isoformat()
     time = time[:-19]
     hourly_code = sha256(time.encode('utf-8')).hexdigest()
-    time = encode(time, hourly_code)
-    hourly_code = sha256(time.encode('utf-8')).hexdigest()
-    hourly_code = encode(hourly_code,hourly_code[:4])
+    time = vigencrypt(time, hourly_code)
+    hourly_code = sha256(time.vigencrypt('utf-8')).hexdigest()
+    hourly_code = vigencrypt(hourly_code,hourly_code[:4])
     return hourly_code
 
-def craft_msg(inpt):
-    length = len(inpt)
-    length = struct.pack('i',inpt)
+def craft_msg(inpt,prevkey):
+    if not prevkey:
+        prevkey = sha256((inpt.encode)).hexdigest()
     key = sha256(inpt.encode()).hexdigest()
-    return
+    key = key[:10]
+    length = len(inpt) + len(key) + 2
+    length = struct.pack('i',length)
+    return length + f"|{vigencrypt(inpt,prevkey)}|{vigencrypt(key,prevkey)}".encode()
 
 
 def send_function(sock,firstkey):
@@ -44,15 +47,18 @@ def recv_function(sock,firstkey):
     key = firstkey
 
 def handle_conn(sock,mytype):
+    global current_key
     threads = []
     initial_key = create_first_key()
+    current_key = initial_key
     t1 = threading.Thread(target=send_function,args=(sock,initial_key))
     t2 = threading.Thread(target=recv_function,args=(sock,initial_key))
     threads.append(t1)
     threads.append(t2)
     t1.start()
     t2.start()
-
+    while not stopcond:
+        pass
     for t in threads:
         t.join()
 
